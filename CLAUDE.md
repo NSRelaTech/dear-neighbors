@@ -4,7 +4,17 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Dear Neighbors** — Chrome extension that replaces the new tab page with a neighborhood dashboard. Community-curated local news links + participation opportunities (Harmonica sessions, Polis conversations, etc.). Part of the Citizen Infrastructure ecosystem (NSRT).
+**Dear Neighbors** — Chrome extension that replaces the new tab page with a neighborhood dashboard. Community-curated local news links + participation opportunities (Harmonica sessions, Polis conversations, etc.). Part of the Citizen Infrastructure ecosystem.
+
+### Git Remotes
+
+Two remotes — push to both when syncing:
+- `origin` — `Citizen-Infra/dear-neighbors` (upstream, generic multi-city version)
+- `nsrelatech` — `NSRelaTech/dear-neighbors` (Novi Sad fork, NS-specific customizations)
+
+### Design Docs
+
+`docs/plans/` contains design and implementation docs. Check before starting new work — there may be an existing plan.
 
 ## Skills
 
@@ -36,13 +46,13 @@ Bump version in both `extension/public/manifest.json` and `extension/package.jso
 
 SVG source at `extension/public/icons/icon.svg`. Generate PNGs: `npx sharp-cli -i icon.svg -o icon-{size}.png resize {size} {size}` for 16, 48, 128.
 
-### Edge Functions
+### Supabase (project: `eeidclmhfkndimghdyuq`)
 
-`fetch-url-metadata` — server-side URL metadata extraction (title, description) used by SubmitLinkForm. Deployed via `mcp__supabase__deploy_edge_function`. No JWT required (anon key sufficient).
+**Edge Functions** — deployed directly via `mcp__supabase__deploy_edge_function`, NOT stored locally. Current functions:
+- `fetch-url-metadata` — server-side URL metadata extraction (title, description) used by SubmitLinkForm. No JWT required (anon key sufficient).
+- `sync-reddit` — daily sync of r/novi_sad top posts into `links` table with Anthropic translation (NS fork)
 
-### Migrations
-
-SQL migrations in `api/migrations/` applied via MCP tool (`mcp__supabase__apply_migration`, project `eeidclmhfkndimghdyuq`).
+**Migrations** — SQL in `api/migrations/`, applied via `mcp__supabase__apply_migration`. Currently 014 migrations. The edge function uses the service role key to bypass RLS for system-inserted links (`submitted_by = null, source IS NOT NULL`).
 
 ### CWS Assets
 
@@ -91,7 +101,7 @@ Signals-based stores in `src/store/`:
 Supabase Postgres with RLS. Schema in `api/migrations/`:
 - `neighborhoods` — hierarchical: country → city → neighborhood → block (type CHECK constraint). ~111 countries, ~340 cities seeded. Novi Sad and Krasnodar have neighborhood rows; other cities can be expanded with data-only migrations.
 - `topics` — interest categories (10 seeded)
-- `links` + `link_topics` + `link_votes` — community-curated links with hot scoring. `submitted_by` defaults to `auth.uid()`. `link_topics` and `link_votes` cascade on link delete.
+- `links` + `link_topics` + `link_votes` — community-curated links with hot scoring. `submitted_by` defaults to `auth.uid()`. `link_topics` and `link_votes` cascade on link delete. `source` column: null = user-submitted, `'reddit'` = imported. `title_translated`/`description_translated` for auto-translated content.
 - `admins` — users who can delete any link. RLS delete policy on `links` allows submitter OR admin.
 - `sessions` + `session_topics` — participation opportunities (Harmonica, Polis, etc.)
 - `user_preferences` — saved filters for signed-in users
@@ -117,6 +127,21 @@ Supabase Postgres with RLS. Schema in `api/migrations/`:
 - Supabase RLS scoping: queries touching user-specific data (e.g. `link_votes`) must include `.eq('user_id', userId)` — the DB uses `auth.uid()` in RLS policies and view definitions, but client-side queries still need explicit user scoping
 - Adding neighborhoods for new cities is a data-only migration — no code changes needed
 - `auth-modal.css` defines `.modal-overlay` used by both SettingsModal and other overlays — don't remove shared classes when refactoring
+
+## User Feedback
+
+**Tyler Sullberg (Feb 16, 2026)** — tested DN, key feedback:
+- **Cold start problem** — extension is empty for new users in cities with no links. Reddit integration addresses this for Novi Sad.
+- **Geolocation instead of city picker** — "The ideal version is you're not even entering where you live. It asks for permissions on your location and gives you links based on location." Could rank posts by relevance + proximity. Future improvement for upstream.
+- **Start with real needs** — "Communities build when people have an actual need they're trying to solve." Generic community tools without a specific problem don't get adoption.
+
+## NS Fork Customizations
+
+The NSRelaTech fork has Novi Sad-specific features (see `docs/plans/2026-03-06-ns-fork-customization-design.md`):
+- **Hardcoded location** — auto-sets Serbia > Novi Sad on first load, country/city selectors removed from onboarding and Settings
+- **Reddit r/novi_sad** — daily edge function syncs top monthly posts into links feed, with `source = 'reddit'` and a toggleable "r/novi_sad" topic
+- **Auto-translation** — Reddit posts translated from Serbian to English via Anthropic Haiku at sync time. UI shows translated version when user's language differs from content language
+- `reddit.js` store — `showReddit` signal (persisted to `dn_show_reddit` localStorage), controls Reddit content visibility
 
 ## Related Projects
 
