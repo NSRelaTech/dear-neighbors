@@ -1,8 +1,7 @@
 import { useState } from 'preact/hooks';
 import {
-  neighborhoods, activeNeighborhoodId, selectedCountryId, selectedCityId,
-  countries, citiesForCountry, neighborhoodsForCity,
-  setSelectedCountry, setSelectedCity, setActiveNeighborhood,
+  activeNeighborhoodId, selectedCityId,
+  neighborhoodsForCity, setActiveNeighborhood,
 } from '../store/neighborhoods';
 import { topics, activeTopicIds, toggleTopic, clearTopicFilters, allTopicsActive } from '../store/topics';
 import { showSessions, setShowSessions } from '../store/sessions';
@@ -110,62 +109,32 @@ export function SettingsModal({ onClose }) {
         <section class="settings-section">
           <h4 class="settings-section-title">{t('settings.location')}</h4>
 
-          <label class="settings-label">{t('settings.country')}</label>
-          <select
-            class="location-select"
-            value={selectedCountryId.value || ''}
-            onChange={(e) => setSelectedCountry(e.target.value)}
-          >
-            <option value="">{t('settings.selectCountry')}</option>
-            {countries.value.map((c) => (
-              <option key={c.id} value={c.id}>{c.name}</option>
-            ))}
-          </select>
-
-          {selectedCountryId.value && (
-            <>
-              <label class="settings-label">{t('settings.city')}</label>
-              <select
-                class="location-select"
-                value={selectedCityId.value || ''}
-                onChange={(e) => setSelectedCity(e.target.value)}
+          {/* NS fork: location is hardcoded to Novi Sad — only the neighborhood
+              picker remains (no country/city selectors). */}
+          <label class="settings-label">{t('settings.neighborhood')}</label>
+          <div class="neighborhood-list">
+            <button
+              class={`neighborhood-item ${activeNeighborhoodId.value === selectedCityId.value ? 'active' : ''}`}
+              onClick={() => setActiveNeighborhood(selectedCityId.value)}
+            >
+              <span class="neighborhood-name">{t('settings.allNeighborhoods')}</span>
+              {activeNeighborhoodId.value === selectedCityId.value && (
+                <span class="neighborhood-check">&#10003;</span>
+              )}
+            </button>
+            {neighborhoodsForCity.value.map((n) => (
+              <button
+                key={n.id}
+                class={`neighborhood-item ${n.id === activeNeighborhoodId.value ? 'active' : ''}`}
+                onClick={() => setActiveNeighborhood(n.id)}
               >
-                <option value="">{t('settings.selectCity')}</option>
-                {citiesForCountry.value.map((c) => (
-                  <option key={c.id} value={c.id}>{c.name}</option>
-                ))}
-              </select>
-            </>
-          )}
-
-          {selectedCityId.value && (
-            <>
-              <label class="settings-label">{t('settings.neighborhood')}</label>
-              <div class="neighborhood-list">
-                <button
-                  class={`neighborhood-item ${activeNeighborhoodId.value === selectedCityId.value ? 'active' : ''}`}
-                  onClick={() => setActiveNeighborhood(selectedCityId.value)}
-                >
-                  <span class="neighborhood-name">{t('settings.allNeighborhoods')}</span>
-                  {activeNeighborhoodId.value === selectedCityId.value && (
-                    <span class="neighborhood-check">&#10003;</span>
-                  )}
-                </button>
-                {neighborhoodsForCity.value.map((n) => (
-                  <button
-                    key={n.id}
-                    class={`neighborhood-item ${n.id === activeNeighborhoodId.value ? 'active' : ''}`}
-                    onClick={() => setActiveNeighborhood(n.id)}
-                  >
-                    <span class="neighborhood-name">{n.name}</span>
-                    {n.id === activeNeighborhoodId.value && (
-                      <span class="neighborhood-check">&#10003;</span>
-                    )}
-                  </button>
-                ))}
-              </div>
-            </>
-          )}
+                <span class="neighborhood-name">{n.name}</span>
+                {n.id === activeNeighborhoodId.value && (
+                  <span class="neighborhood-check">&#10003;</span>
+                )}
+              </button>
+            ))}
+          </div>
         </section>
 
         <section class="settings-section">
