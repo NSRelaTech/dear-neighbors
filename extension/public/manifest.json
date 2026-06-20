@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Dear Neighbors",
+  "name": "Dear Neighbors — Novi Sad Edition",
   "version": "0.2.0",
   "description": "A neighborhood dashboard with community-curated news and local participation opportunities.",
   "permissions": ["tabs", "storage"],
