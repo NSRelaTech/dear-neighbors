@@ -50,7 +50,7 @@ SVG source at `extension/public/icons/icon.svg`. Generate PNGs: `npx sharp-cli -
 
 **Edge Functions** — deployed directly via `mcp__supabase__deploy_edge_function`, NOT stored locally. Current functions:
 - `fetch-url-metadata` — server-side URL metadata extraction (title, description) used by SubmitLinkForm. No JWT required (anon key sufficient).
-- `sync-reddit` — daily sync of r/novi_sad top posts into `links` table with Anthropic translation (NS fork)
+- `sync-reddit` — daily sync of r/novi_sad top posts into `links` table with Anthropic translation (NS fork). Uses Reddit **app-only OAuth** (`client_credentials`) — Reddit hard-blocks unauthenticated `.json` requests from Supabase's datacenter IPs. Requires secrets `REDDIT_CLIENT_ID`, `REDDIT_CLIENT_SECRET` (register a "script" app at reddit.com/prefs/apps) and `ANTHROPIC_API_KEY` (translation; skipped gracefully if absent). `verify_jwt: true`.
 
 **Migrations** — SQL in `api/migrations/`, applied via `mcp__supabase__apply_migration`. Currently 014 migrations. The edge function uses the service role key to bypass RLS for system-inserted links (`submitted_by = null, source IS NOT NULL`).
 
