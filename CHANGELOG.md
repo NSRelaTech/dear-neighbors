@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.2.0] - 2026-06-20
+
+Novi Sad edition (NSRelaTech fork).
+
+### Added
+- Auto-sets location to Novi Sad on first run
+- Simplified 2-step onboarding (language + sign-in)
+
+### Changed
+- Settings: removed country/city pickers (location is fixed to Novi Sad)
+
+### Internal
+- Groundwork for r/novi_sad community-content sync (toggle, source badge, auto-translated titles) — content sync activates once Reddit API access is approved
+
 ## [0.1.8] - 2026-02-02
 
 ### Changed
