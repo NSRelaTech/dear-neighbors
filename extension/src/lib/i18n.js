@@ -38,6 +38,8 @@ const translations = {
     'settings.interfaceLanguage': 'Interface Language',
     'settings.contentFilter': 'Content Language Filter',
     'settings.contentFilterHint': 'Show only content matching your interface language.',
+    'settings.reddit': 'Reddit r/novi_sad',
+    'settings.redditHint': 'Show top posts from the r/novi_sad subreddit in your feed.',
     'settings.account': 'Account',
     'settings.signedInAs': 'Signed in as',
 
@@ -173,6 +175,8 @@ const translations = {
     'settings.interfaceLanguage': 'Jezik interfejsa',
     'settings.contentFilter': 'Filter jezika sadržaja',
     'settings.contentFilterHint': 'Prikaži samo sadržaj na jeziku interfejsa.',
+    'settings.reddit': 'Reddit r/novi_sad',
+    'settings.redditHint': 'Prikaži popularne objave sa r/novi_sad u tvom fidu.',
     'settings.account': 'Nalog',
     'settings.signedInAs': 'Prijavljeni kao',
 

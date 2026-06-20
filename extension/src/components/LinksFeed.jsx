@@ -5,6 +5,7 @@ import { activeTopicIds, allTopicsActive } from '../store/topics';
 import { user, isSignedIn, isAdmin, showAuthModal } from '../store/auth';
 import { uiLanguage, t } from '../lib/i18n';
 import { contentLanguageFilter } from '../store/language';
+import { showReddit } from '../store/reddit';
 import { SubmitLinkForm } from './SubmitLinkForm';
 import '../styles/links.css';
 
@@ -23,6 +24,7 @@ export function LinksFeed() {
       sort: newSort,
       topRange: newSort === 'top' ? r : undefined,
       language: contentLanguageFilter.value ? uiLanguage.value : null,
+      excludeReddit: !showReddit.value,
     });
   }
 
@@ -33,6 +35,7 @@ export function LinksFeed() {
       sort,
       topRange: sort === 'top' ? topRange : undefined,
       language: contentLanguageFilter.value ? uiLanguage.value : null,
+      excludeReddit: !showReddit.value,
       ...overrides,
     };
   }

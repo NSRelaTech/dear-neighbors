@@ -5,6 +5,7 @@ import { loadNeighborhoods, filterNeighborhoodIds, locationConfigured, neighborh
 import { loadTopics, activeTopicIds, allTopicsActive } from './store/topics';
 import { loadEnvironmentData } from './store/environment';
 import { loadLinks } from './store/links';
+import { showReddit } from './store/reddit';
 import { loadSessions, showSessions } from './store/sessions';
 import { initTheme } from './store/theme';
 import { uiLanguage, t } from './lib/i18n';
@@ -41,7 +42,7 @@ export function App() {
 
     if (neighborhoodIds.length === 0) return;
 
-    loadLinks({ neighborhoodIds, topicIds, language });
+    loadLinks({ neighborhoodIds, topicIds, language, excludeReddit: !showReddit.value });
     loadSessions({ neighborhoodIds, topicIds, language });
 
     // Load AQI/UV for the selected city
@@ -51,7 +52,7 @@ export function App() {
     if (city && country) {
       loadEnvironmentData(city.name, country.name);
     }
-  }, [ready, filterNeighborhoodIds.value, activeTopicIds.value, contentLanguageFilter.value, uiLanguage.value]);
+  }, [ready, filterNeighborhoodIds.value, activeTopicIds.value, contentLanguageFilter.value, uiLanguage.value, showReddit.value]);
 
   if (!ready) {
     return (

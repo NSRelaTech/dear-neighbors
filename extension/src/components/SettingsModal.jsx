@@ -5,6 +5,7 @@ import {
 } from '../store/neighborhoods';
 import { topics, activeTopicIds, toggleTopic, clearTopicFilters, allTopicsActive } from '../store/topics';
 import { showSessions, setShowSessions } from '../store/sessions';
+import { showReddit, setShowReddit } from '../store/reddit';
 import { theme, setTheme } from '../store/theme';
 import { uiLanguage, setUiLanguage, t } from '../lib/i18n';
 import { contentLanguageFilter, setContentLanguageFilter } from '../store/language';
@@ -160,6 +161,21 @@ export function SettingsModal({ onClose }) {
           {allTopicsActive.value && (
             <p class="settings-hint">{t('settings.allTopicsHint')}</p>
           )}
+        </section>
+
+        <section class="settings-section">
+          <label class="settings-toggle-row">
+            <span class="settings-toggle-label">{t('settings.reddit')}</span>
+            <label class="settings-toggle-switch">
+              <input
+                type="checkbox"
+                checked={showReddit.value}
+                onChange={(e) => setShowReddit(e.target.checked)}
+              />
+              <span class="settings-toggle-track" />
+            </label>
+          </label>
+          <p class="settings-hint">{t('settings.redditHint')}</p>
         </section>
 
         <section class="settings-section">

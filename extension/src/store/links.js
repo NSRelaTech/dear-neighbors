@@ -9,7 +9,7 @@ export const linksHasMore = signal(true);
 
 const PAGE_SIZE = 20;
 
-export async function loadLinks({ neighborhoodIds = [], topicIds = [], sort = 'hot', topRange, page = 1, append = false, language = null }) {
+export async function loadLinks({ neighborhoodIds = [], topicIds = [], sort = 'hot', topRange, page = 1, append = false, language = null, excludeReddit = false }) {
   linksLoading.value = true;
 
   let query = supabase
@@ -26,6 +26,11 @@ export async function loadLinks({ neighborhoodIds = [], topicIds = [], sort = 'h
 
   if (language) {
     query = query.eq('language', language);
+  }
+
+  // NS fork: when the Reddit toggle is off, exclude source='reddit' links.
+  if (excludeReddit) {
+    query = query.or('source.is.null,source.neq.reddit');
   }
 
   if (sort === 'top' && topRange && topRange !== 'all') {
