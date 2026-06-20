@@ -1,18 +1,64 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const REDDIT_URL = "https://www.reddit.com/r/novi_sad/top.json?t=month&limit=25";
+// Reddit blocks unauthenticated .json requests from datacenter IPs (Supabase
+// edge runs on such IPs), so we use app-only OAuth (client_credentials grant)
+// against oauth.reddit.com. Requires REDDIT_CLIENT_ID + REDDIT_CLIENT_SECRET
+// secrets (register a "script" app at https://www.reddit.com/prefs/apps).
+const REDDIT_OAUTH_URL =
+  "https://oauth.reddit.com/r/novi_sad/top?t=month&limit=25";
+const REDDIT_TOKEN_URL = "https://www.reddit.com/api/v1/access_token";
 const ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages";
+const USER_AGENT = "web:dear-neighbors:v0.1.9 (Citizen Infra / NSRelaTech)";
 
-Deno.serve(async (req) => {
+async function getRedditToken(
+  clientId: string,
+  clientSecret: string,
+): Promise<string> {
+  const res = await fetch(REDDIT_TOKEN_URL, {
+    method: "POST",
+    headers: {
+      "Authorization": "Basic " + btoa(`${clientId}:${clientSecret}`),
+      "Content-Type": "application/x-www-form-urlencoded",
+      "User-Agent": USER_AGENT,
+    },
+    body: "grant_type=client_credentials",
+  });
+  if (!res.ok) {
+    throw new Error(
+      `Reddit token endpoint returned ${res.status}: ${(await res.text()).slice(0, 200)}`,
+    );
+  }
+  const data = await res.json();
+  if (!data.access_token) throw new Error("Reddit token response had no access_token");
+  return data.access_token;
+}
+
+Deno.serve(async (_req) => {
   try {
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
     );
 
-    // Fetch Reddit posts
-    const redditRes = await fetch(REDDIT_URL, {
-      headers: { "User-Agent": "DearNeighbors/1.0 (Supabase Edge Function)" },
+    const clientId = Deno.env.get("REDDIT_CLIENT_ID");
+    const clientSecret = Deno.env.get("REDDIT_CLIENT_SECRET");
+    if (!clientId || !clientSecret) {
+      return new Response(
+        JSON.stringify({
+          error:
+            "Missing REDDIT_CLIENT_ID / REDDIT_CLIENT_SECRET secrets. Register a script app at reddit.com/prefs/apps and add both as Supabase Edge Function secrets.",
+        }),
+        { status: 500 },
+      );
+    }
+
+    // App-only OAuth token, then fetch the subreddit's top monthly posts.
+    const token = await getRedditToken(clientId, clientSecret);
+    const redditRes = await fetch(REDDIT_OAUTH_URL, {
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "User-Agent": USER_AGENT,
+      },
     });
     if (!redditRes.ok) {
       return new Response(
