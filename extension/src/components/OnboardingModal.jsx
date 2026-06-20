@@ -1,9 +1,4 @@
 import { useState } from 'preact/hooks';
-import {
-  countries, citiesForCountry,
-  selectedCountryId, selectedCityId,
-  setSelectedCountry, setSelectedCity,
-} from '../store/neighborhoods';
 import { uiLanguage, setUiLanguage, t } from '../lib/i18n';
 import { signInWithMagicLink } from '../store/auth';
 import '../styles/onboarding-modal.css';
@@ -11,21 +6,16 @@ import '../styles/language.css';
 import '../styles/auth-modal.css';
 
 export function OnboardingModal({ onComplete }) {
+  // NS fork: location is auto-set to Novi Sad, so onboarding is 2 steps —
+  // step 1 = Language, step 2 = Account.
   const [step, setStep] = useState(1);
   const [email, setEmail] = useState('');
   const [sent, setSent] = useState(false);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState(null);
 
-  const countrySelected = Boolean(selectedCountryId.value);
-  const citySelected = Boolean(selectedCityId.value);
-
-  function handleCountryChange(e) {
-    setSelectedCountry(e.target.value);
-  }
-
-  function handleCityChange(e) {
-    setSelectedCity(e.target.value);
+  function chooseLanguage(lang) {
+    setUiLanguage(lang);
     setStep(2);
   }
 
@@ -63,71 +53,34 @@ export function OnboardingModal({ onComplete }) {
           <span class="onboarding-line">
             <span class={`onboarding-line-fill ${step >= 2 ? 'filled' : ''}`} />
           </span>
-          <span class={`onboarding-dot ${step >= 3 ? 'done' : step >= 2 ? 'active' : ''}`} />
-          <span class="onboarding-line">
-            <span class={`onboarding-line-fill ${step >= 3 ? 'filled' : ''}`} />
-          </span>
-          <span class={`onboarding-dot ${step >= 3 ? 'active' : ''}`} />
+          <span class={`onboarding-dot ${step >= 2 ? 'active' : ''}`} />
         </div>
 
         <div class="onboarding-body">
           <div class="onboarding-steps">
-            {/* Step 1: Location */}
+            {/* Step 1: Language */}
             <section class="onboarding-step">
-              <label class="onboarding-label">{t('onboarding.selectCountry')}</label>
-              <select
-                class="location-select"
-                value={selectedCountryId.value || ''}
-                onChange={handleCountryChange}
-              >
-                <option value="">{t('settings.selectCountry')}</option>
-                {countries.value.map((c) => (
-                  <option key={c.id} value={c.id}>{c.name}</option>
-                ))}
-              </select>
-
-              {countrySelected && (
-                <>
-                  <label class="onboarding-label">{t('onboarding.selectCity')}</label>
-                  <select
-                    class="location-select"
-                    value={selectedCityId.value || ''}
-                    onChange={handleCityChange}
-                  >
-                    <option value="">{t('settings.selectCity')}</option>
-                    {citiesForCountry.value.map((c) => (
-                      <option key={c.id} value={c.id}>{c.name}</option>
-                    ))}
-                  </select>
-                </>
-              )}
+              <label class="onboarding-label">{t('onboarding.languageStep')}</label>
+              <div class="lang-switch">
+                <button
+                  class={`lang-switch-option ${uiLanguage.value === 'en' ? 'active' : ''}`}
+                  onClick={() => chooseLanguage('en')}
+                >
+                  <span class="lang-flag">{'🇬🇧'}</span>
+                  English
+                </button>
+                <button
+                  class={`lang-switch-option ${uiLanguage.value === 'sr' ? 'active' : ''}`}
+                  onClick={() => chooseLanguage('sr')}
+                >
+                  <span class="lang-flag">{'🇷🇸'}</span>
+                  Srpski
+                </button>
+              </div>
             </section>
 
-            {/* Step 2: Language */}
-            {step >= 2 && citySelected && (
-              <section class="onboarding-step">
-                <label class="onboarding-label">{t('onboarding.languageStep')}</label>
-                <div class="lang-switch">
-                  <button
-                    class={`lang-switch-option ${uiLanguage.value === 'en' ? 'active' : ''}`}
-                    onClick={() => setUiLanguage('en')}
-                  >
-                    <span class="lang-flag">{'\uD83C\uDDEC\uD83C\uDDE7'}</span>
-                    English
-                  </button>
-                  <button
-                    class={`lang-switch-option ${uiLanguage.value === 'sr' ? 'active' : ''}`}
-                    onClick={() => setUiLanguage('sr')}
-                  >
-                    <span class="lang-flag">{'\uD83C\uDDF7\uD83C\uDDF8'}</span>
-                    Srpski
-                  </button>
-                </div>
-              </section>
-            )}
-
-            {/* Step 3: Account (optional) */}
-            {step >= 2 && citySelected && (
+            {/* Step 2: Account (optional) */}
+            {step >= 2 && (
               <section class="onboarding-step">
                 <label class="onboarding-label">{t('onboarding.accountStep')}</label>
 
@@ -148,7 +101,6 @@ export function OnboardingModal({ onComplete }) {
                         placeholder={t('auth.placeholder')}
                         value={email}
                         onInput={(e) => setEmail(e.target.value)}
-                        onFocus={() => setStep(3)}
                         required
                       />
                       {error && <p class="auth-error">{error}</p>}
@@ -162,7 +114,7 @@ export function OnboardingModal({ onComplete }) {
             )}
           </div>
 
-          {step >= 2 && citySelected && (
+          {step >= 2 && (
             <button class="onboarding-cta" onClick={handleFinish}>
               {sent ? t('onboarding.getStarted') : t('onboarding.skipSignIn')}
             </button>

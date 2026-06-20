@@ -90,7 +90,7 @@ const translations = {
 
     // Onboarding
     'onboarding.welcome': 'Welcome to Dear Neighbors',
-    'onboarding.subtitle': 'Pick your city and language to get started',
+    'onboarding.subtitle': 'Pick your language to get started',
     'onboarding.selectCountry': 'Select your country',
     'onboarding.selectCity': 'Select your city',
     'onboarding.languageStep': 'Choose your language',
@@ -225,7 +225,7 @@ const translations = {
 
     // Onboarding
     'onboarding.welcome': 'Dobrodošli na Dragi susedi',
-    'onboarding.subtitle': 'Izaberite grad i jezik da započnete',
+    'onboarding.subtitle': 'Izaberite jezik da započnete',
     'onboarding.selectCountry': 'Izaberite državu',
     'onboarding.selectCity': 'Izaberite grad',
     'onboarding.languageStep': 'Izaberite jezik',

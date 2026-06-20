@@ -100,6 +100,21 @@ export async function loadNeighborhoods() {
     }
     return;
   }
+
+  // NS fork: auto-set to Serbia > Novi Sad if no location configured.
+  // Reuses savedCountry/savedCity declared above — do not redeclare.
+  if (!savedCountry || !savedCity) {
+    const serbia = data.find((n) => n.name === 'Serbia' && n.type === 'country');
+    const noviSad = data.find((n) => n.name === 'Novi Sad' && n.type === 'city');
+    if (serbia && noviSad) {
+      selectedCountryId.value = serbia.id;
+      localStorage.setItem('dn_country', serbia.id);
+      selectedCityId.value = noviSad.id;
+      localStorage.setItem('dn_city', noviSad.id);
+      activeNeighborhoodId.value = noviSad.id;
+      localStorage.setItem('dn_neighborhood', noviSad.id);
+    }
+  }
 }
 
 export function setSelectedCountry(id) {
