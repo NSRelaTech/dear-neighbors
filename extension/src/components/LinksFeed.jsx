@@ -140,6 +140,12 @@ function LinkCard({ link, onVote, onDelete }) {
   const timeAgo = getTimeAgo(link.created_at);
   const canDelete = isAdmin.value || (user.value && link.submitted_by === user.value.id);
 
+  // NS fork: show the translated title/description when the UI language differs
+  // from the link's source language (Reddit posts are stored in Serbian).
+  const showTranslated = link.source === 'reddit' && uiLanguage.value !== link.language;
+  const displayTitle = (showTranslated && link.title_translated) || link.title;
+  const displayDescription = (showTranslated && link.description_translated) || link.description;
+
   return (
     <article class="link-card">
       <div class="link-vote">
@@ -162,12 +168,15 @@ function LinkCard({ link, onVote, onDelete }) {
       </div>
       <div class="link-content">
         <a class="link-title" href={link.url} target="_blank" rel="noopener noreferrer">
-          {link.title}
+          {displayTitle}
         </a>
         <span class="link-domain">{domain}</span>
-        {link.description && <p class="link-description">{link.description}</p>}
+        {displayDescription && <p class="link-description">{displayDescription}</p>}
         <div class="link-meta">
           <span class="link-time">{timeAgo}</span>
+          {link.source === 'reddit' && (
+            <span class="link-source-badge link-source-reddit">r/novi_sad</span>
+          )}
           {link.submitter_name && (
             <span class="link-author">by {link.submitter_name}</span>
           )}

@@ -213,6 +213,24 @@
   color: var(--color-text-secondary);
 }
 
+/* NS fork: source badge for Reddit-imported links. Pill geometry matches
+   .link-tag so it sits naturally among the meta chips; Reddit brand orange is
+   the one bold accent, signalling the external source at a glance. */
+.link-source-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 8px;
+  border-radius: 100px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
+.link-source-reddit {
+  background: #ff4500;
+  color: #fff;
+}
+
 .link-delete {
   margin-left: auto;
   padding: 0 4px;
