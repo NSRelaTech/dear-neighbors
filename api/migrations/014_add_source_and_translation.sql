@@ -54,20 +54,7 @@ left join lateral (
 insert into topics (name, slug) values ('r/novi_sad', 'r-novi-sad')
 on conflict (slug) do nothing;
 
--- NOTE (reviewer flag): the sync-reddit edge function uses the service_role key,
--- which BYPASSES RLS entirely, so no INSERT policy is strictly required for it.
--- The two policies below mirror the original plan. They have no TO clause, so they
--- apply to PUBLIC — i.e. any client (incl. anon) could insert null-attributed,
--- source-tagged links. Confirm desired before relying on them; otherwise they can
--- be dropped without affecting the edge function.
-drop policy if exists "links_insert_service" on links;
-create policy "links_insert_service" on links for insert
-  with check (submitted_by is null and source is not null);
-
-drop policy if exists "link_topics_insert_service" on link_topics;
-create policy "link_topics_insert_service" on link_topics for insert
-  with check (
-    exists (
-      select 1 from links where id = link_id and source is not null
-    )
-  );
+-- No INSERT policy is needed for the sync-reddit edge function: it uses the
+-- service_role key, which bypasses RLS entirely. (Earlier drafts added public
+-- INSERT policies here; dropped — they were unnecessary and, lacking a TO clause,
+-- would have let any client insert null-attributed, source-tagged links.)
